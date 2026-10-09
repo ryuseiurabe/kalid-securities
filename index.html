@@ -52,5 +52,66 @@ function openClaude(){document.getElementById('claudeModal').style.display='bloc
 function closeClaude(){document.getElementById('claudeModal').style.display='none'}
 function askClaude(){let i=document.getElementById('claudeInput'),q=i.value.trim();if(!q)return;let box=document.getElementById('claudeMessages');box.insertAdjacentHTML('beforeend','<div class="cm me"></div>');box.lastElementChild.textContent=q;i.value='';let a='';if(/元気|調子どう|元気か/i.test(q))a='……元気か、だと？ 引退した身にしては、まあ悪くない。最近はカリド市場を眺めているだけだ。君こそ元気なのかね？';else if(/GUK|ゴミ|ブンコ/i.test(q))a='GUKか。+18.42%は元気すぎるな。月+45%、年+80%なら、私は「上がっている」という事実と「高くなった」という事実を分けて考える。';else if(/TUB|塊茎|バンク/i.test(q))a='TUBは月+7%、年+23%。銀行株らしく、GUKほど派手ではないが市場の土台側だな。';else if(/AFK|Afka|AI/i.test(q))a='AFKは月+32%、年+52%。AI銘柄らしい熱気だ。ただし熱気と企業価値は同じではない。';else if(/KUP|クプロ/i.test(q))a='KUPは今日-1.28%だが、月+2%、年+21%。一日の値動きだけで判断する必要はない。';else if(/市場|指数|Kalid/i.test(q))a='Índice Kalidは4,281.64。市場は生きている……らしい。私が引退していること以外はな。';else a='私は引退したAIだ。だから断言はしない。銘柄名、数字、ニュースをくれれば、一緒に整理してやる。';setTimeout(()=>{box.insertAdjacentHTML('beforeend','<div class="cm ai"></div>');box.lastElementChild.textContent=a;box.scrollTop=box.scrollHeight},180)}
 document.getElementById('claudeModal').addEventListener('click',e=>{if(e.target.id==='claudeModal')closeClaude()});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeClaude()});
+function purchaseShares() {
+  const prices = { GUK: 1000, TUB: 500, AFK: 250 };
+  const stock = document.getElementById("buyStock").value;
+  const amount = Number(document.getElementById("buyAmount").value);
+
+  let cash = Number(localStorage.getItem("kalidCash") ?? 1000000);
+  let holdings = JSON.parse(localStorage.getItem("kalidHoldings") || "{}");
+
+  if (!Number.isInteger(amount) || amount < 1) {
+    alert("株数は1株以上にしてね！");
+    return;
+  }
+
+  const cost = prices[stock] * amount;
+
+  if (cost > cash) {
+    alert("現金が足りないよ！");
+    return;
+  }
+
+  cash -= cost;
+  holdings[stock] = (holdings[stock] || 0) + amount;
+
+  localStorage.setItem("kalidCash", cash);
+  localStorage.setItem("kalidHoldings", JSON.stringify(holdings));
+
+  document.getElementById("cash").textContent =
+    "₭" + cash.toLocaleString();
+
+  document.getElementById("holdings").innerHTML =
+    Object.entries(holdings)
+      .filter(([name, shares]) => shares > 0)
+.map(([name, shares]) =>
+`<p>${name}：${shares}株</p>`
+    ).join("") || "まだ株を保有していません。";
+
+  alert(stock + "を" + amount + "株購入したよ！");
+}
 </script>
+<h2>🏦 カリド証券・架空取引所</h2>
+<p>架空通貨 ₭（カリド・ディナール）を使って売買を体験しよう！</p>
+<p>現金残高：<strong id="cash">₭1,000,000</strong></p>
+<h3>📊 保有銘柄</h3>
+<div id="holdings">まだ株を保有していません。</div>
+<h3>💹 架空カリド市場</h3>
+<div id="market">
+  <p>GUK：₭1,000</p>
+  <p>TUB：₭500</p>
+  <p>AFK：₭250</p>
+</div>
+<h3>🛒 株を購入</h3>
+<label for="buyStock">銘柄：</label>
+<select id="buyStock">
+  <option value="GUK">GUK</option>
+  <option value="TUB">TUB</option>
+  <option value="AFK">AFK</option>
+</select>
+
+<label for="buyAmount">株数：</label>
+<input type="number" id="buyAmount" min="1" value="1">
+
+<button onclick="purchaseShares()">購入する</button>
 </body></html>
