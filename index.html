@@ -90,8 +90,74 @@ function purchaseShares() {
 
   alert(stock + "を" + amount + "株購入したよ！");
 }
+const chartHistory = {
+  GUK: [1000, 1020, 990, 1050, 1080, 1060, 1120],
+  TUB: [500, 510, 495, 520, 515, 530, 540],
+  AFK: [250, 245, 260, 270, 265, 280, 300]
+};
+
+function drawChart() {
+  const canvas = document.getElementById("stockChart");
+  if (!canvas) return;
+
+  const ctx = canvas.getContext("2d");
+  const stock = document.getElementById("chartStock").value;
+  const values = chartHistory[stock];
+
+  const w = canvas.width;
+  const h = canvas.height;
+  const pad = 45;
+
+  ctx.clearRect(0, 0, w, h);
+  ctx.font = "14px sans-serif";
+  ctx.fillStyle = "#888";
+  ctx.fillText(stock + " 株価（₭）", 12, 20);
+
+  const min = Math.min(...values) * 0.95;
+  const max = Math.max(...values) * 1.05;
+
+  ctx.strokeStyle = "#cccccc";
+  ctx.lineWidth = 1;
+
+  for (let i = 0; i < 5; i++) {
+    const y = pad + (h - pad * 2) * i / 4;
+    ctx.beginPath();
+    ctx.moveTo(pad, y);
+    ctx.lineTo(w - 10, y);
+    ctx.stroke();
+  }
+
+  ctx.strokeStyle = "#16a34a";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+
+  values.forEach((price, i) => {
+    const x = pad + (w - pad - 20) * i / (values.length - 1);
+    const y = h - pad -
+      ((price - min) / (max - min)) * (h - pad * 2);
+
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+
+  ctx.stroke();
+}
+
+drawChart();
 </script>
 <h2>🏦 カリド証券・架空取引所</h2>
+<h3>📈 株価チャート</h3>
+
+<label for="chartStock">表示する銘柄：</label>
+<select id="chartStock" onchange="drawChart()">
+  <option value="GUK">GUK</option>
+  <option value="TUB">TUB</option>
+  <option value="AFK">AFK</option>
+</select>
+
+<canvas id="stockChart" width="600" height="300"
+  style="width:100%;max-width:600px;border:1px solid #888;">
+</canvas>
 <p>架空通貨 ₭（カリド・ディナール）を使って売買を体験しよう！</p>
 <p>現金残高：<strong id="cash">₭1,000,000</strong></p>
 <h3>📊 保有銘柄</h3>
