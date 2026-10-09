@@ -95,7 +95,32 @@ const chartHistory = {
   TUB: [500, 510, 505, 515, 512, 520, 518, 525, 530, 535],
   AFK: [250, 300, 220, 340, 260, 380, 290, 420, 310, 450]
 };
+function updateStockPrices() {
+  Object.keys(chartHistory).forEach(stock => {
+    const history = chartHistory[stock];
+    const lastPrice = history[history.length - 1];
 
+    let volatility = 0.03;
+    if (stock === "GUK") volatility = 0.06;
+    if (stock === "AFK") volatility = 0.12;
+
+    const change = (Math.random() * 2 - 1) * volatility;
+    const newPrice = Math.max(
+      1,
+      Math.round(lastPrice * (1 + change))
+    );
+
+    history.push(newPrice);
+
+    if (history.length > 30) {
+      history.shift();
+    }
+  });
+
+  drawChart();
+}
+
+setInterval(updateStockPrices, 10000);
 function drawChart() {
   const canvas = document.getElementById("stockChart");
   if (!canvas) return;
